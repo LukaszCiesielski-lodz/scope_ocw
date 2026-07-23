@@ -1,0 +1,20 @@
+{
+  "shell": {
+    "n_runs": 1,
+    "n_alive": 1,
+    "seeded_fraction": 0.03829377788499666,
+    "match_ratio": 1.0,
+    "diss_ratio_T_mean": NaN,
+    "diss_ratio_T_std": NaN,
+    "diss_ratio_max_mean": NaN,
+    "kappa_gzip_T_mean": 0.9390205638696363,
+    "kappa_gzip_T_std": 0.0,
+    "fill_T_mean": 0.0,
+    "tau_diss_mean": null,
+    "tau_diss_std": null,
+    "n_passed_diss": 0,
+    "tau_gzip_mean": 90.0,
+    "tau_gzip_std": 0.0,
+    "n_passed_gzip": 1
+  }
+}

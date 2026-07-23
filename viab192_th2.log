@@ -1,0 +1,36 @@
+[v2] grid=192^3 steps=40000 F=0.042 k=0.062 shell_th=2.0 1 jobs / 1 GPUs
+/root/scope/scope_topology_v2.py:115: RuntimeWarning: All-NaN axis encountered
+  "diss_ratio_max": float(np.nanmax(rec["diss_ratio"])),
+[gpu0] shell        seed=1000 alive=1 diss_ratio(T)=nan max=nan tau_diss=None kappa_gzip(T)=0.9390 fill=0.000 (207s)
+/root/scope/scope_topology_v2.py:155: RuntimeWarning: Mean of empty slice
+  "diss_ratio_T_mean": float(np.nanmean(dr[:, -1])),
+/usr/local/lib/python3.10/dist-packages/numpy/lib/_nanfunctions_impl.py:2019: RuntimeWarning: Degrees of freedom <= 0 for slice.
+  var = nanvar(a, axis=axis, dtype=dtype, out=out, ddof=ddof,
+/root/scope/scope_topology_v2.py:157: RuntimeWarning: Mean of empty slice
+  "diss_ratio_max_mean": float(np.nanmean([r["diss_ratio_max"] for r in runs])),
+/root/scope/scope_topology_v2.py:187: RuntimeWarning: Mean of empty slice
+  m, s = np.nanmean(A, 0), np.nanstd(A, 0)
+/usr/local/lib/python3.10/dist-packages/numpy/lib/_nanfunctions_impl.py:2019: RuntimeWarning: Degrees of freedom <= 0 for slice.
+  var = nanvar(a, axis=axis, dtype=dtype, out=out, ddof=ddof,
+
+[v2] 1 runs in 3.5 min -> viab192_th2
+{
+  "shell": {
+    "n_runs": 1,
+    "n_alive": 1,
+    "seeded_fraction": 0.03829377788499666,
+    "match_ratio": 1.0,
+    "diss_ratio_T_mean": NaN,
+    "diss_ratio_T_std": NaN,
+    "diss_ratio_max_mean": NaN,
+    "kappa_gzip_T_mean": 0.9390205638696363,
+    "kappa_gzip_T_std": 0.0,
+    "fill_T_mean": 0.0,
+    "tau_diss_mean": null,
+    "tau_diss_std": null,
+    "n_passed_diss": 0,
+    "tau_gzip_mean": 90.0,
+    "tau_gzip_std": 0.0,
+    "n_passed_gzip": 1
+  }
+}

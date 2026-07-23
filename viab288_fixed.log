@@ -1,0 +1,66 @@
+[v2] grid=288^3 steps=60000 F=0.042 k=0.062 shell_th=3.0 3 jobs / 4 GPUs
+[gpu0] central      seed=1000 alive=1 diss_ratio(T)=0.9947 max=1.0036 tau_diss=6390.0 kappa_gzip(T)=1.0042 fill=0.618 (1330s)
+[gpu1] shell        seed=1000 alive=1 diss_ratio(T)=1.0066 max=138830.6000 tau_diss=2700.0 kappa_gzip(T)=0.9479 fill=0.617 (1332s)
+[gpu2] distributed  seed=1000 alive=1 diss_ratio(T)=0.9949 max=0.9949 tau_diss=None kappa_gzip(T)=0.9967 fill=0.616 (1335s)
+/root/scope/scope_topology_v2.py:187: RuntimeWarning: Mean of empty slice
+  m, s = np.nanmean(A, 0), np.nanstd(A, 0)
+/usr/local/lib/python3.10/dist-packages/numpy/lib/_nanfunctions_impl.py:2019: RuntimeWarning: Degrees of freedom <= 0 for slice.
+  var = nanvar(a, axis=axis, dtype=dtype, out=out, ddof=ddof,
+
+[v2] 3 runs in 22.3 min -> viab288_fixed_60k
+{
+  "central": {
+    "n_runs": 1,
+    "n_alive": 1,
+    "seeded_fraction": 0.038178823857966004,
+    "match_ratio": 1.0009044122397124,
+    "diss_ratio_T_mean": 0.994742670776061,
+    "diss_ratio_T_std": 0.0,
+    "diss_ratio_max_mean": 1.0035903567746198,
+    "kappa_gzip_T_mean": 1.0042434560315883,
+    "kappa_gzip_T_std": 0.0,
+    "fill_T_mean": 0.6176851505805143,
+    "tau_diss_mean": 6390.0,
+    "tau_diss_std": 0.0,
+    "n_passed_diss": 1,
+    "tau_gzip_mean": 6120.0,
+    "tau_gzip_std": 0.0,
+    "n_passed_gzip": 1
+  },
+  "shell": {
+    "n_runs": 1,
+    "n_alive": 1,
+    "seeded_fraction": 0.038144325662960846,
+    "match_ratio": 1.0,
+    "diss_ratio_T_mean": 1.0065974843393857,
+    "diss_ratio_T_std": 0.0,
+    "diss_ratio_max_mean": 138830.59997866012,
+    "kappa_gzip_T_mean": 0.9478727742925538,
+    "kappa_gzip_T_std": 0.0,
+    "fill_T_mean": 0.6167203305255635,
+    "tau_diss_mean": 2700.0,
+    "tau_diss_std": 0.0,
+    "n_passed_diss": 1,
+    "tau_gzip_mean": 90.0,
+    "tau_gzip_std": 0.0,
+    "n_passed_gzip": 1
+  },
+  "distributed": {
+    "n_runs": 1,
+    "n_alive": 1,
+    "seeded_fraction": 0.038391870746762716,
+    "match_ratio": 1.0064896961605547,
+    "diss_ratio_T_mean": 0.994876604631015,
+    "diss_ratio_T_std": 0.0,
+    "diss_ratio_max_mean": 0.994876604631015,
+    "kappa_gzip_T_mean": 0.996717094288333,
+    "kappa_gzip_T_std": 0.0,
+    "fill_T_mean": 0.6163770940199021,
+    "tau_diss_mean": null,
+    "tau_diss_std": null,
+    "n_passed_diss": 0,
+    "tau_gzip_mean": 3960.0,
+    "tau_gzip_std": 0.0,
+    "n_passed_gzip": 1
+  }
+}
