@@ -2,7 +2,8 @@
 
 > Ten plik to handoff z rozmowy na claude.ai (2026-07-23). Wrzuć go do
 > katalogu głównego repo — Claude Code przeczyta go automatycznie jako
-> kontekst projektu. Maszyna obliczeniowa: GPU na vast.ai przez SSH.
+> kontekst projektu. Maszyna obliczeniowa pierwotnie: GPU na vast.ai przez
+> SSH; **od 2026-07-24 wykonawca to notebooki Kaggle** (patrz §4).
 
 ## 1. Kontekst naukowy (skrót rozmowy)
 
@@ -71,7 +72,37 @@ Pułapka: na siatkach <48³ narzut nagłówka gzip zawyża K jednorodnych
 regionów — porównywać kształty krzywych i uporządkowania, nie wartości
 bezwzględne między rozmiarami siatek.
 
-## 4. Do zrobienia na GPU (kolejność)
+## 4. Wykonawca obliczeń
+
+**Zmiana 2026-07-24: wykonawca zmienił się z instancji vast.ai przez SSH
+na notebooki Kaggle.** Konsekwencje operacyjne:
+
+- **Sprzęt**: 2× T4 na sesję (czasem P100), nie 4× RTX 4090. Mniej równoległości
+  i wolniejsze GPU niż zakładały wcześniejsze szacunki czasu w tym pliku
+  i w RESUME.md — nieaktualne, nie ekstrapolować z nich budżetu na Kaggle.
+- **Brak trwałej powłoki SSH.** Polecenia wchodzą jako komórki notebooka
+  (`!python3 ...`), nie jako sesja terminala. Klucz wdrożeniowy do GitHuba
+  (opisany w starym RESUME.md dla vast.ai) nie ma tu odpowiednika —
+  wypychanie do repo z poziomu notebooka wymaga własnej konfiguracji
+  (token/secret Kaggle) albo ściągnięcia wyników przez zakładkę Output i
+  commitu lokalnie; nie zakładać, które z tych dwóch jest aktywne bez
+  potwierdzenia.
+- **Sesje GPU są limitowane czasowo** (rząd wielkości: ~9–12 h na sesję,
+  tygodniowy limit godzin GPU). To bezpośrednio motywowało przepisanie
+  `masked_laplacian` na conv3d (patrz CHANGELOG) — stara implementacja
+  dawała ~1010 s/przebieg (~16.8 min) na T4 przy 192³, co przy pełnym
+  zestawie konfirmacyjnym (3 topologie × n przebiegów) nie mieściło się w
+  jednej sesji.
+- **Zestaw komend do wklejenia w komórki Kaggle** (setup, brama
+  równoważności/prędkości, potem A/B′/C) jest w RESUME.md — to jest wersja
+  aktualna; polecenia `python scope_topology.py ...` niżej w tej sekcji są
+  **historyczne** (v1, sprzed rewizji metodologicznej w CRITERIA_v2.md) i
+  zachowane tylko jako zapis, czego dotyczyła oryginalna rozmowa.
+- **Podział zestawu konfirmacyjnego na sesje Kaggle wg budżetu godzin
+  GPU** — w toku, czeka na sondy timingowe (2×T4 vs P100). Nie zakładać
+  podziału z góry.
+
+### Historyczne polecenia v1 (przed CRITERIA_v2, nieużywane produkcyjnie)
 
 ```bash
 pip install torch numpy matplotlib
@@ -80,8 +111,8 @@ python scope_topology.py --grid 96 --steps 20000 --n-runs 8 --outdir results_x1
 # kontrola skali domeny (ROZSTRZYGAJĄCA dla zarzutu homogenizacji)
 python scope_topology.py --grid 192 --steps 20000 --n-runs 8 --scale 2 --outdir results_x2
 ```
-Szacunkowo: 96³ ≈ minuty/przebieg na RTX 3090/4090; 192³ ≈ 8× dłużej;
-całość 1–2 h.
+Szacunkowo (na 4× RTX 3090/4090, NIE na Kaggle): 96³ ≈ minuty/przebieg;
+192³ ≈ 8× dłużej; całość 1–2 h.
 
 ## 5. Kryteria decyzyjne (ustalone PRZED przebiegami — nie zmieniać po)
 

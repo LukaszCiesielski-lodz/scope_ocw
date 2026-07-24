@@ -21,6 +21,11 @@ the audit reference):
      interpretable while fill < 1; once the pattern tiles the domain both
      regions are trivially alike.
 
+  4. LAPLACIAN is conv3d, not the roll-based masked_laplacian
+     (scope_laplacian.py) -- an implementation change, not a protocol
+     change (CHANGELOG.md, 2026-07-24); the roll-based version in
+     scope_topology.py is untouched and remains the v1 audit reference.
+
 First-passage times are reported for both channels:
   tau_gzip : first t with kappa_gzip >= parity   (legacy, comparable to v1)
   tau_diss : first t with diss_ratio  >= parity   (cost-based)
@@ -39,7 +44,9 @@ import numpy as np
 import torch
 import torch.multiprocessing as mp
 
-from scope_topology import build_masks, masked_laplacian, K_compress
+from scope_topology import build_masks, K_compress
+from scope_laplacian import (build_laplacian_kernel, build_boundary_correction,
+                             masked_laplacian_conv3d)
 from scope_seed import seed_fields_v2
 from scope_thermo import thermo_observables, K_floor_bytes
 
@@ -66,6 +73,13 @@ def run_one_v2(n, topology, seed, args, device):
     Du, Dv, F, k, dt = args.Du, args.Dv, args.F, args.k, args.dt
     n_dom = float(domain.sum().item())
 
+    # conv3d Laplacian (scope_laplacian.py): fixed kernel + boundary
+    # correction computed once per grid, replacing 12 torch.roll pairs/step.
+    # Equivalence vs the v1 roll-based masked_laplacian is gated by
+    # scope_test_laplacian_equivalence.py, not asserted here.
+    lap_kernel, _ = build_laplacian_kernel(device, domain_f.dtype)
+    lap_correction = build_boundary_correction(domain_f)
+
     rec = {kk: [] for kk in REC_KEYS}
 
     for step in range(args.steps + 1):
@@ -91,8 +105,8 @@ def run_one_v2(n, topology, seed, args, device):
             rec["v_mass"].append(th["v_mass"])
             rec["fill"].append(float((v > 0.1).sum().item()) / n_dom)
 
-        lap_u = masked_laplacian(u, domain_f)
-        lap_v = masked_laplacian(v, domain_f)
+        lap_u = masked_laplacian_conv3d(u, lap_kernel, lap_correction)
+        lap_v = masked_laplacian_conv3d(v, lap_kernel, lap_correction)
         uvv = u * v * v
         u = u + dt * (Du * lap_u - uvv + F * (1.0 - u))
         v = v + dt * (Dv * lap_v + uvv - (F + k) * v)

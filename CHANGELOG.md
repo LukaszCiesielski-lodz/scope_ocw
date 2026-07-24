@@ -6,6 +6,67 @@ które raz zmieniono pod wpływem danych, jest wiarygodne tylko wtedy, gdy
 
 ---
 
+## 2026-07-24 — `masked_laplacian` → conv3d w pipeline v2 (ZMIANA IMPLEMENTACYJNA, nie protokołu)
+
+**To nie jest zmiana kryteriów ani obserwabli.** CRITERIA_v2.md §0–§7
+niezmienione: dalej τ_border/diss, log-rank na KM, ta sama definicja
+horyzontu i te same bramki ważności. Wpis tylko dlatego, że koszt
+obliczeniowy jednego przebiegu jest częścią tego, co decyduje, czy dana
+konfirmacja mieści się w budżecie sesji Kaggle (patrz RESUME.md) — nie
+dlatego, że wynik naukowy się zmienia.
+
+**Powód.** Sonda 2×T4/192³/40000 kroków ujawniła w tracebacku wąskie
+gardło w `masked_laplacian` (`scope_topology.py`): 12 wywołań
+`torch.roll` na krok (6 sąsiadów × 2 tensory — pole i maska domeny), ~24
+tensory pełnowymiarowe na krok przy 192³. Zmierzony realny czas: 1010
+s/przebieg (~16.8 min) na T4.
+
+**Zmiana.** Nowy plik `scope_laplacian.py` implementuje ten sam operator
+przez `F.conv3d` ze stałym kernelem 3×3×3 (środek=−6, sześciu sąsiadów=
++1) plus jednorazowo (per siatka, nie per krok) policzoną korektą
+brzegową `(6 − deg)`, gdzie `deg` to liczba sąsiadów w domenie —
+implementacja no-flux Neumanna równoważna maskowaniu w wersji
+roll-based (wyprowadzenie w docstringu pliku). `scope_topology_v2.py`
+przełączony na tę funkcję. **`scope_topology.py` i `scope_run.py` (v1,
+zapis audytowy, `scope_run.py` bitowo identyczny z `scope_topology.py`)
+NIE zostały dotknięte** — inwariant z wpisu 2026-07-23 (v1 zachowane bez
+zmian) utrzymany.
+
+**Kryterium przyjęcia, ustalone przed uruchomieniem testu:** smoke test
+32³/400 kroków, max|Δ| < 1e-6 na obu polach (u, v) względem trajektorii
+liczonej starą implementacją; przy niepowodzeniu zmiana nie jest
+mergowana do ścieżki produkcyjnej. Implementacja i test:
+`scope_test_laplacian_equivalence.py`.
+
+**Wynik testu.** Uruchomiony lokalnie na CPU (ten sandbox nie ma GPU) —
+max|Δu| = 2.68e-7, max|Δv| = 2.38e-7 (najgorsza z trzech topologii przy
+(F,k)=(0.042, 0.062)) — **PASS**, margines > 3× wobec progu. Rozszerzony
+niewiążący check do 4000 kroków pokazuje wzrost błędu w przybliżeniu
+liniowy (≈2.4e-6), bez oznak rozjazdu wykładniczego, co jest przesłanką
+(nie dowodem) stabilności na horyzontach produkcyjnych 45000–67000
+kroków.
+
+**Nie jest jeszcze uznane za w pełni zweryfikowane.** Ścieżka
+zmiennoprzecinkowa cuDNN-conv3d na GPU różni się kolejnością sumowania od
+zarówno CPU-conv3d, jak i roll-based — zgodność zmierzona na CPU jest
+mocną przesłanką (ten sam operator algebraicznie), nie dowodem
+równoważności na T4. Test musi zostać powtórzony na Kaggle przed pushem;
+komenda w RESUME.md, sekcja „Aktualizacja 2026-07-24".
+
+**Speedup nie zmierzony na docelowym sprzęcie.** Skrypt
+`scope_bench_laplacian.py` gotowy (192³/2000 kroków, z opcją
+`--compile` jako drugim krokiem, tylko jeśli sam conv3d nie da ≥3×). Na
+CPU wynik wyszedł na niekorzyść conv3d (0.4×) — nieinformacyjne dla
+kierunku na GPU, bo zysk ma wynikać ze zmniejszenia liczby uruchomień
+kerneli i ruchu w pamięci na GPU (cuDNN), czego CPU nie odtwarza; liczba
+wiążąca dopiero z Kaggle.
+
+**Status pusha: WSTRZYMANY.** Zgodnie z instrukcją — miarę przyspieszenia
+mierzy się przed pushem, a bramkę równoważności trzeba potwierdzić na
+docelowym sprzęcie, nie tylko lokalnie.
+
+---
+
 ## 2026-07-23 — v1 → v2
 
 **Zmienione po obejrzeniu danych pilotażowych `results_x1` (96³) oraz
