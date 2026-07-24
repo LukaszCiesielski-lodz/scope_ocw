@@ -6,6 +6,39 @@ które raz zmieniono pod wpływem danych, jest wiarygodne tylko wtedy, gdy
 
 ---
 
+## 2026-07-24 — `torch.compile` domyślnie włączony w pipeline v2 (ZMIANA IMPLEMENTACYJNA, nie protokołu)
+
+**To nie jest zmiana kryteriów ani obserwabli**, z tego samego powodu co
+wpis niżej o conv3d: dotyczy tylko tego, ile przebiegów mieści się w
+sesji Kaggle, nie definicji obserwabli.
+
+**Zmiana domyślnego zachowania.** `scope_topology_v2.py` kompiluje teraz
+ścieżkę laplasjanu (`scope_laplacian.py`) i krok Eulera przez
+`torch.compile`, bez flagi — **zawsze włączone, gdy urządzenie to CUDA**.
+Wcześniej cała ścieżka była czysto eager. Na CPU (np. smoke test lokalny
+bez GPU) zachowanie niezmienione — `torch.compile` nie jest nawet
+próbowany.
+
+**Fallback.** Jeśli kompilacja lub pierwsze wywołanie skompilowanej
+funkcji rzuci wyjątkiem (np. brak Tritona na danym obrazie Kaggle),
+proces drukuje ostrzeżenie i przełącza się trwale na wersję
+nieskompilowaną (eager) dla reszty procesu — bieg NIE jest przerywany.
+Nie ma trybu „spróbuj ponownie": po jednym niepowodzeniu dana sesja
+workera zostaje w eager do końca, żeby nie płacić wielokrotnie kosztu
+nieudanej rekompilacji.
+
+**Powód.** Ten sam motyw budżetu godzin GPU co przy przepisaniu
+laplasjanu na conv3d — `scope_bench_laplacian.py` miał opcję `--compile`
+jako drugi krok, jeśli sam conv3d nie da ≥3×; to włącza tamten drugi
+krok na stałe w ścieżce produkcyjnej zamiast zostawiać go opcjonalnym.
+
+**Nie zweryfikowane na docelowym sprzęcie.** Jak przy conv3d: przyspieszenie
+i poprawność (brak rozjazdu trajektorii z powodu innej kolejności
+sumowania w skompilowanym grafie) trzeba potwierdzić na Kaggle (2×T4),
+nie tylko wnioskować z tego, że kod się importuje.
+
+---
+
 ## 2026-07-24 — `masked_laplacian` → conv3d w pipeline v2 (ZMIANA IMPLEMENTACYJNA, nie protokołu)
 
 **To nie jest zmiana kryteriów ani obserwabli.** CRITERIA_v2.md §0–§7

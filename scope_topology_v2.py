@@ -56,6 +56,34 @@ REC_KEYS = ("t", "kappa_gzip", "kappa_exc", "K_inner", "K_border",
             "diss_total", "v_mass", "fill")
 
 
+# torch.compile on the Laplacian + Euler step, on by default for CUDA
+# (CHANGELOG.md, 2026-07-24). No flag to disable: if compilation or the
+# first compiled call raises (e.g. no Triton), fall back to eager for the
+# rest of the process rather than aborting the run.
+_COMPILE_FAILED = False
+_COMPILED_STEP = None
+
+
+def _euler_step(u, v, lap_kernel, lap_correction, domain, Du, Dv, F, k, dt):
+    lap_u = masked_laplacian_conv3d(u, lap_kernel, lap_correction)
+    lap_v = masked_laplacian_conv3d(v, lap_kernel, lap_correction)
+    uvv = u * v * v
+    u = u + dt * (Du * lap_u - uvv + F * (1.0 - u))
+    v = v + dt * (Dv * lap_v + uvv - (F + k) * v)
+    u = torch.where(domain, u.clamp(0, 1), torch.zeros_like(u))
+    v = torch.where(domain, v.clamp(0, 1), torch.zeros_like(v))
+    return u, v
+
+
+def _get_step_fn(device):
+    global _COMPILED_STEP
+    if device.type != "cuda" or _COMPILE_FAILED:
+        return _euler_step
+    if _COMPILED_STEP is None:
+        _COMPILED_STEP = torch.compile(_euler_step)
+    return _COMPILED_STEP
+
+
 @torch.no_grad()
 def run_one_v2(n, topology, seed, args, device):
     domain, inner, border, r, R = build_masks(n, device)
@@ -81,6 +109,7 @@ def run_one_v2(n, topology, seed, args, device):
     lap_correction = build_boundary_correction(domain_f)
 
     rec = {kk: [] for kk in REC_KEYS}
+    step_fn = _get_step_fn(device)
 
     for step in range(args.steps + 1):
         if step % args.record_every == 0:
@@ -105,13 +134,18 @@ def run_one_v2(n, topology, seed, args, device):
             rec["v_mass"].append(th["v_mass"])
             rec["fill"].append(float((v > 0.1).sum().item()) / n_dom)
 
-        lap_u = masked_laplacian_conv3d(u, lap_kernel, lap_correction)
-        lap_v = masked_laplacian_conv3d(v, lap_kernel, lap_correction)
-        uvv = u * v * v
-        u = u + dt * (Du * lap_u - uvv + F * (1.0 - u))
-        v = v + dt * (Dv * lap_v + uvv - (F + k) * v)
-        u = torch.where(domain, u.clamp(0, 1), torch.zeros_like(u))
-        v = torch.where(domain, v.clamp(0, 1), torch.zeros_like(v))
+        try:
+            u, v = step_fn(u, v, lap_kernel, lap_correction, domain, Du, Dv, F, k, dt)
+        except Exception as e:
+            if step_fn is _euler_step:
+                raise
+            global _COMPILE_FAILED
+            _COMPILE_FAILED = True
+            print(f"[scope] WARNING: torch.compile failed at step {step} "
+                  f"({type(e).__name__}: {e}); falling back to eager "
+                  "for the rest of this process", flush=True)
+            step_fn = _euler_step
+            u, v = step_fn(u, v, lap_kernel, lap_correction, domain, Du, Dv, F, k, dt)
 
     def first_passage(series):
         for t, x in zip(rec["t"], series):
