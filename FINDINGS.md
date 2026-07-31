@@ -299,3 +299,11 @@ mieszałaby efekt frakcji z efektem odległości do granicy.
 - `scan_topo/viability.json` — 8 kandydatów × 3 topologie.
 - `results_x2/` — **nie uruchomiono.** Przy obecnej definicji κ ten
   przebieg zmierzyłby przesunięcie podłogi gzip, nie fizykę.
+
+## Ramię A (konfirmacja) — wynik, 2026-07-31
+
+Ramię A (192³, n=16, τ_border, próg 10% wartości końcowej): distributed
+360 < shell 1350 < central 3330; log-rank p_Holm=7.7e-08 dla wszystkich
+par; stabilne dla progów 1–50%; wszystkie 48 przebiegów alive,
+seeded_fraction ~5.72%; werdykt NIEROZSTRZYGNIETE zgodnie z CRITERIA_v2,
+oczekuje testu skalowania w B′.

@@ -1,0 +1,55 @@
+{
+  "_comment": "Kanoniczna lokalizacja miarki wrazliwosci dla scope_analyze.py --yardstick (patrz CRITERIA_v2 SS4). Klucz 'tau_border_spread' (rozrzut tau_border pod perturbacja (F,k) +-2%) jest jeszcze nieuzupelniony -- patrz RESUME.md, TODO #2 (sens_192/ pusty). Ta sekcja to osobne pre-registration dla testu skalowania B'.",
+  "tau_border_spread": null,
+
+  "b_prime_scaling_prereg": {
+    "date": "2026-07-31",
+    "label": "pre-registration, przed odpaleniem B'",
+    "status": "locked before B' run",
+
+    "arm_A": {
+      "grid": 192,
+      "n": 16,
+      "seeds": "2000-2015",
+      "observable": "tau_border",
+      "threshold": "10% wartosci koncowej",
+      "medians": { "distributed": 360, "shell": 1350, "central": 3330 },
+      "test": "log-rank (Mantel-Cox), korekta Holma",
+      "p_holm_all_pairs": 7.7e-08,
+      "verdict": "NIEROZSTRZYGNIETE wg CRITERIA_v2 -- czeka na test skalowania"
+    },
+
+    "arm_B_prime": {
+      "grid": 288,
+      "shell_thickness": 4.5,
+      "n": 12,
+      "seeds": "2000-2011",
+      "topologies": ["shell"],
+      "rationale": "iloraz tau(B')/tau(A) ma sens tylko dla shell -- jedyna topologia obecna w obu skalach z niezmienionym r0=0.75R (patrz RESUME.md/FINDINGS.md, 'wariant zastepczy trojkata')"
+    },
+
+    "ratio_definition": "tau_border(B', shell) / tau_border(A, shell)",
+
+    "predictions": [
+      {
+        "label": "transport frontowy",
+        "condition": "ratio w [1.25, 1.75]",
+        "range": [1.25, 1.75],
+        "point_estimate": 1.5,
+        "tolerance": 0.25,
+        "interpretation": "droga frontu do granicy rosnie x1.5 (192->288); front reakcji-dyfuzji biegnie ze stala predkoscia"
+      },
+      {
+        "label": "homogenizacja",
+        "condition": "ratio <= 1.15",
+        "range": [null, 1.15],
+        "interpretation": "tau nie skaluje z rozmiarem domeny -- kappa->1 to lokalna equilibracja, nie transport struktury"
+      },
+      {
+        "label": "nieokreslone/inne",
+        "condition": "ratio poza obiema powyzszymi granicami",
+        "interpretation": "nierozstrzygniete"
+      }
+    ]
+  }
+}

@@ -6,6 +6,16 @@ które raz zmieniono pod wpływem danych, jest wiarygodne tylko wtedy, gdy
 
 ---
 
+## 2026-07-31 — pre-registration, przed odpaleniem B′
+
+Widełki wyniku dla ramienia B′ (test skalowania samopodobnego, 288³, `shell`
+only, n=12, ziarna 2000–2011) zarejestrowane przed odpaleniem w
+`sensitivity.json` (`b_prime_scaling_prereg`): τ(B′)/τ(A) ∈ [1.25, 1.75] →
+transport frontowy, ≤ 1.15 → homogenizacja, poza tymi zakresami →
+nierozstrzygnięte.
+
+---
+
 ## 2026-07-24 — `torch.compile` domyślnie włączony w pipeline v2 (ZMIANA IMPLEMENTACYJNA, nie protokołu)
 
 **To nie jest zmiana kryteriów ani obserwabli**, z tego samego powodu co
