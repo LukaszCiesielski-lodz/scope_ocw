@@ -1,0 +1,20 @@
+{
+  "shell": {
+    "n_runs": 12,
+    "n_alive": 12,
+    "seeded_fraction": 0.05730643021713328,
+    "match_ratio": 1.0,
+    "diss_ratio_T_mean": 1.0000696166741971,
+    "diss_ratio_T_std": 0.001663797919132318,
+    "diss_ratio_max_mean": 73267.33073509608,
+    "kappa_gzip_T_mean": 0.9764251646109195,
+    "kappa_gzip_T_std": 0.007654575259897872,
+    "fill_T_mean": 0.617887579349271,
+    "tau_diss_mean": 2752.5,
+    "tau_diss_std": 44.37059837324712,
+    "n_passed_diss": 12,
+    "tau_gzip_mean": 90.0,
+    "tau_gzip_std": 0.0,
+    "n_passed_gzip": 12
+  }
+}
