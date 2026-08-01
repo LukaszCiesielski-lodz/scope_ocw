@@ -6,6 +6,25 @@ które raz zmieniono pod wpływem danych, jest wiarygodne tylko wtedy, gdy
 
 ---
 
+## 2026-08-01 — Konfirmacja topologiczna zamknięta
+
+**Nie jest to zmiana kryteriów** — CRITERIA_v2.md §0–§7 niezmienione. Wpis
+rejestruje zamknięcie zestawu konfirmacyjnego uruchomionego pod v2, zgodnie
+z zasadą tego pliku ("zamrożenie kryteriów jest wiarygodne tylko wtedy, gdy
+ślad zmiany/zamknięcia jest publiczny").
+
+Konfirmacja topologiczna zamknięta: A (192³ n=16) + B′ (288³ n=12 shell) +
+C1 (288³ n=6) + sonda parametryczna ±0.5% (192³ shell). Werdykt:
+POTWIERDZONE warunkowo z jawnie opisanymi marginesami efekt/rozrzut. C2
+(druga połowa C) i rozszerzona sonda pozostają jako opcjonalne robustness
+checks do rewizji preprintu.
+
+Pełny opis każdego ramienia, ilorazy C1/A, marginesy efekt/rozrzut i
+uczciwa interpretacja naukowa: RESUME.md, sekcja "Konfirmacja zamknięta
+2026-08-01".
+
+---
+
 ## 2026-07-31 — pre-registration, przed odpaleniem B′
 
 Widełki wyniku dla ramienia B′ (test skalowania samopodobnego, 288³, `shell`

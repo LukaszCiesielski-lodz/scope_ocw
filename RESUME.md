@@ -1,5 +1,134 @@
 # RESUME — stan pracy
 
+## Konfirmacja zamknięta 2026-08-01
+
+Zestaw A + B′ + C1 + sonda parametryczna ±0.5% domknięty. Werdykt
+automatyczny (`scope_analyze.py --primary conf_A_192 --control conf_C1_288
+--yardstick sens_192_shell_narrow/sensitivity.json`): **POTWIERDZONE
+(warunkowo — decyzja o interpretacji miarki wrażliwości pozostawiona
+autorowi)**. Pełne wyjście skryptu i surowe dane w `conf_A_192/`,
+`conf_B_288/`, `conf_C1_288/`, `sens_192_shell/`, `sens_192_shell_narrow/`.
+
+### Ramię A — podstawowe (`conf_A_192/`)
+
+192³, F=0.042, k=0.062, n=16, ziarna 2000–2015, wszystkie 3 topologie.
+Wszystkie 48 przebiegów żyje (n_alive=16/16 na topologię), bramki B1–B4
+WAŻNE, frakcja zasiewu ~5.72%, fill(T)≈0.619 (poniżej progu nasycenia 0.9).
+τ_border (próg 10% wartości końcowej, cenzura na horyzoncie T=8100),
+mediany:
+
+```
+distributed 360  <  shell 1350  <  central 3330
+```
+
+Log-rank (Mantel-Cox) na wszystkich trzech parach, p_Holm ≈ 1.5e-07–1.9e-07
+(korekta Holma na 6 porównaniach łącznie z ramieniem C1). Porządek
+`distributed < shell < central` stabilny dla progów 1%, 5%, 10%, 25%, 50%
+wartości końcowej.
+
+### Ramię B′ — rozplątujące, test skalowania (`conf_B_288/`)
+
+288³, tylko `shell`, grubość powłoki 4.5 (frakcja 5.73%, zachowana wobec A;
+r0=0.75R niezmienione — patrz FINDINGS.md, "wariant zastępczy trójkąta"),
+n=12, ziarna 2000–2011. 12/12 żyje, bramka WAŻNA. τ_border mediana = 1890.
+
+Iloraz τ(B′)/τ(A, shell) = 1890/1350 = **1.40** — wpada w pre-registered
+przedział [1.25, 1.75] zarejestrowany z góry 2026-07-31 (CHANGELOG, przed
+uruchomieniem B′) dla hipotezy "transport frontowy" (droga frontu
+reakcji-dyfuzji do granicy rośnie z rozmiarem domeny przy ~stałej
+prędkości frontu). NIE w paśmie homogenizacji (≤1.15). Czysty efekt n przy
+stałej frakcji zasiewu przeżywa więc test skalowania.
+
+### Ramię C1 — kontrolne, połowa zestawu (`conf_C1_288/`)
+
+288³, wszystkie 3 topologie, grubość 3.0, **n=6** (ziarna 2000–2005 —
+połowa zaplanowanych n=12 dla ramienia C, druga połowa nieodpalona; commit
+"half C"). 18/18 żyje, wszystkie bramki WAŻNE. Frakcja zasiewu ~3.82% —
+**zmniejszona względem A** (5.72%): świadomie zaakceptowana konfundacja
+frakcji ze skalą, tak jak opisano przy ratyfikacji wariantu B′ wyżej w tym
+pliku (grubość ∝ n nie daje samopodobieństwa fizycznego, patrz też
+FINDINGS.md). τ_border mediany:
+
+```
+distributed 810  <  shell 1890  <  central 4770
+```
+
+**Ten sam porządek co A.** Log-rank, p_Holm ≈ 1.19e-03 dla wszystkich
+trzech par kontrolnych (korekta Holma współdzielona z A, 6 porównań
+łącznie). Porządek `distributed < shell < central` zachowany na obu
+skalach (192³ i 288³).
+
+Ilorazy τ(C1)/τ(A) (informacyjnie, poza formalną definicją testu
+skalowania B′→A, która dotyczy wyłącznie `shell` przy stałej frakcji):
+
+| topologia | τ(C1) | τ(A) | iloraz | w widełkach transportu [1.25,1.75]? |
+|---|---|---|---|---|
+| shell | 1890 | 1350 | **1.40** | tak |
+| central | 4770 | 3330 | **1.43** | tak |
+| distributed | 810 | 360 | **2.25** | nie — spójne z konfundacją frakcji (3.82% vs 5.72%), nie z efektem skali samym w sobie |
+
+### Sonda parametryczna ±0.5% — miarka wrażliwości (`sens_192_shell_narrow/`)
+
+192³, `shell`, seed=1000 (zakres pilotażowy, rozłączny z konfirmacyjnym
+2000+, zgodnie z konwencją projektu), 9 punktów siatki 3×3 w (F,k) wokół
+bazy (0.042, 0.062), perturbacja ±0.5%. Rozrzut τ_border = **630 kroków**.
+fill(T) w paśmie 0.595–0.643 — pozostaje w reżimie bazowym (baza ≈0.62),
+perturbacja nie zmienia reżimu dynamicznego. **Ta miarka jest tą użytą w
+werdykcie powyżej.**
+
+Obserwacja z siatki punktów: τ_border w tym punkcie pracy jest znacznie
+bardziej wrażliwe na `k` niż na `F` — przy zmianie samego `F` o ±0.5%
+τ_border zostaje przy wartości bazowej (1350), przy zmianie samego `k`
+o ±0.5% przesuwa się do 1080 / 1710. Rozrzut miarki jest więc niemal
+w całości napędzany przez `k`, nie przez `F`.
+
+### Sonda parametryczna ±2% — referencja negatywna (`sens_192_shell/`)
+
+Wcześniejsza, szersza sonda: rozrzut τ_border = 3060, ale fill(T) rozjeżdża
+się do 0.51–0.72 (baza 0.62) — perturbacja o tej amplitudzie wypycha część
+punktów poza reżim roboczy, więc zmierzony rozrzut miesza szum
+parametryczny ze zmianą reżimu. **Nie jest to prawidłowa miarka
+wrażliwości** i nie jest użyta w werdykcie; pozostawiona w repo jako
+referencja negatywna — przykład, dlaczego trzeba było zawęzić sondę do
+±0.5% zamiast przyjąć pierwszy wynik.
+
+### Marginesy efekt topologiczny / rozrzut parametryczny (rozrzut=630)
+
+Trzy różnice median τ_border z ramienia A, podzielone przez rozrzut sondy
+wrażliwości ±0.5%:
+
+| para | Δτ_border (A) | margines (Δ / 630) |
+|---|---|---|
+| central vs distributed | 2970 | **4.71×** |
+| central vs shell | 1980 | **3.14×** |
+| shell vs distributed | 990 | **1.57×** |
+
+### Uczciwa interpretacja naukowa
+
+Solidny wynik częściowy. Hipoteza transportu topologicznego potwierdzona
+ilościowo dla porównań central vs {shell, distributed} — marginesy 3.14×
+i 4.71× powyżej rozrzutu parametrycznego, log-rank miażdżąco istotny dla
+wszystkich par na obu skalach z korekcją Holma (p_Holm ≈1.5–1.9e-07 na A,
+≈1.19e-03 na C1), porządek replikuje się 192³→288³, test skalowania B′
+(iloraz 1.40) i ilorazy C1/A dla shell i central (1.40, 1.43) trafiają w
+przedział pre-registered "transport frontowy". Dla porównania shell vs
+distributed margines wynosi 1.57× — na granicy akceptowalności
+metodologicznej, wyraźnie bliżej rozrzutu parametrycznego niż pozostałe
+dwie pary, więc to porównanie jest tym, które najłatwiej byłoby podważyć
+dodatkowym ziarnem albo węższą sondą. Iloraz τ(C1)/τ(A) dla `distributed`
+(2.25) leży poza widełkami transportu — spójne z tym, że C1 zmienia
+frakcję zasiewu wobec A (3.82% vs 5.72%), nie tylko n, więc to porównanie
+nie jest czystym testem skalowania i nie powinno być czytane jako taki.
+
+Wynik nie jest triumfem — jest rzemieślniczo domkniętą pracą do publikacji
+z uczciwie opisanymi granicami interpretacji. Zastrzeżenia do
+"warunkowo" w werdykcie: C1 ma n=6 zamiast zaplanowanych 12 (druga połowa
+ramienia C nieodpalona, C2 pozostaje jako opcjonalny robustness check), a
+miarka wrażliwości pochodzi z jednej topologii (`shell`) i jednego
+rozmiaru siatki (192³), nie z zestawu niezależnego od ramion ocenianych.
+
+---
+
 ## Aktualizacja 2026-07-24 — przejście na Kaggle, sonda, poprawka wydajności
 
 Wykonawca zmienił się z instancji vast.ai (zatrzymanej, opis niżej,
