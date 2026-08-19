@@ -106,6 +106,63 @@ For each topology pair we compare Kaplan-Meier survival curves of τ_border with
 
 Per-voxel fields are computed as D(x) = D_u|∇u|² + D_v|∇v|² (gradient-squared dissipation analogue) and R(x) = uv² (reaction throughput), with gradients evaluated by the same masked stencil as the Laplacian (Sec. A.1). Region averages over the inner core (r ≤ 0.5R) and boundary shell (r ∈ [0.85R, R]) yield diss_inner, diss_border, reac_inner, reac_border. Following the model's phenomenological status, these are dissipation analogues: Gray-Scott is not a thermodynamically consistent reaction network, and |∇·|² is not the rigorous entropy-production rate. They are nonetheless well-defined, topology-comparable cost densities, and their boundary values define the primary observable τ_border.
 
+# Tables
+
+## TABLE I
+
+Pairwise log-rank (Mantel-Cox) contrasts of τ_border between seeding topologies, at both grid resolutions. Medians in recorded time units; p_Holm is Holm-corrected across the six-test family. All confidence intervals non-overlapping; no censored runs.
+
+| Arm | Contrast | Median (a vs b) | χ² | p | p_Holm |
+|-----|----------|-----------------|-----|-----|--------|
+| A (192³) | central vs shell | 3330 / 1350 | 31.00 | 2.6×10⁻⁸ | 1.5×10⁻⁷ |
+| A (192³) | central vs distributed | 3330 / 360 | 30.22 | 3.9×10⁻⁸ | 1.9×10⁻⁷ |
+| A (192³) | shell vs distributed | 1350 / 360 | 30.22 | 3.9×10⁻⁸ | 1.9×10⁻⁷ |
+| C (288³) | central vs shell | 4770 / 1890 | 25.38 | 4.7×10⁻⁷ | 1.3×10⁻⁶ |
+| C (288³) | central vs distributed | 4770 / 855 | 25.55 | 4.3×10⁻⁷ | 1.3×10⁻⁶ |
+| C (288³) | shell vs distributed | 1890 / 855 | 25.55 | 4.3×10⁻⁷ | 1.3×10⁻⁶ |
+
+## TABLE II
+
+Median τ_border as a function of the detection threshold (fraction of final value), at both resolutions. The ordering distributed < shell < central holds at every threshold on both grids.
+
+| Threshold | central A | shell A | distr. A | central C | shell C | distr. C |
+|-----------|-----------|---------|----------|-----------|---------|----------|
+| 1% | 3150 | 810 | 180 | 4590 | 1440 | 360 |
+| 5% | 3240 | 1170 | 270 | 4680 | 1800 | 630 |
+| 10% | 3330 | 1350 | 360 | 4770 | 1890 | 855 |
+| 25% | 3420 | 1620 | 540 | 4950 | 2070 | 1260 |
+| 50% | 3600 | 1890 | 720 | 5220 | 2340 | 1800 |
+
+## TABLE III
+
+Inter-topology differences in median τ_border at 192³, compared against the parametric sensitivity yardstick (spread of τ_border under (F,k) ±0.5%, in-regime).
+
+| Quantity | Value (steps) | Ratio to yardstick |
+|----------|---------------|--------------------|
+| Yardstick: (F,k) ±0.5% spread | 630 | 1.0× (reference) |
+| central − distributed | 2970 | 4.7× |
+| central − shell | 1980 | 3.1× |
+| shell − distributed | 990 | 1.6× |
+
+# References
+
+[1] I. Prigogine and G. Nicolis, Self-Organization in Nonequilibrium Systems (Wiley, New York, 1977). [verify]
+[2] G. Nicolis and I. Prigogine, Q. Rev. Biophys. 4, 107 (1971). [verify]
+[3] M. C. Cross and P. C. Hohenberg, Rev. Mod. Phys. 65, 851 (1993). [verify]
+[4] G. Falasco, R. Rao, and M. Esposito, Phys. Rev. Lett. 121, 108301 (2018). [Firecrawl-verified]
+[5] J. Liang, N. Jiang, C. Liu, Y. Wang, and T. Zhang, arXiv:2409.04663 (2024). [Firecrawl-verified]
+[6] H. Serna, A. P. Muñuzuri, and D. Barragán, Phys. Chem. Chem. Phys. 19, 14401 (2017). [Firecrawl-verified]
+[7] P. Bak, C. Tang, and K. Wiesenfeld, Phys. Rev. Lett. 59, 381 (1987). [verified from original PDF]
+[8] D. S. Grebenkov, J. Phys. A: Math. Theor. (2020); arXiv:2005.13279. [Firecrawl-verified; confirm vol/page from published J. Phys. A]
+[9] D. S. Grebenkov, J. Phys. A: Math. Theor. (2022); arXiv:2203.10898. [Firecrawl-verified; confirm vol/page from published J. Phys. A]
+[10] J. E. Pearson, Science 261, 189 (1993). [Firecrawl-verified, DOI 10.1126/science.261.5118.189]
+[11] P. Gray and S. K. Scott, Chem. Eng. Sci. 39, 1087 (1984). [Firecrawl-verified, DOI 10.1016/0009-2509(84)87017-7]
+[12] J. L. England, J. Chem. Phys. 139, 121923 (2013). [Firecrawl-verified, arXiv:1209.1179]
+[13] S. R. de Groot and P. Mazur, Non-Equilibrium Thermodynamics (Dover, New York, 1984). [verify]
+[14] E. L. Kaplan and P. Meier, J. Am. Stat. Assoc. 53, 457 (1958). [verify]
+[15] N. Mantel, Cancer Chemother. Rep. 50, 163 (1966). [verify]
+[16] S. Holm, Scand. J. Stat. 6, 65 (1979). [verify]
+
 ## Status
 
-Main text draft 1 + Appendix A complete 2026-08-19. Observable-to-FRE relation corrected to reflect phenomenological gradient-squared analogue (per scope_thermo.py). Pending: Tables I–II, bibliography, Figure 1, LaTeX assembly. Repo public before submission.
+Main text + Appendix A + Tables I–III + bibliography complete 2026-08-19. Eight core references Firecrawl-verified; eight (books/classics) flagged [verify] before submission. Grebenkov [8][9] need vol/page from published J. Phys. A. Pending: Figure 1 (Kaplan-Meier + threshold panel), LaTeX assembly (revtex4-2), repo public before arXiv submission.
