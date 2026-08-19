@@ -1,6 +1,55 @@
 # RESUME — stan pracy
 
-## Konfirmacja zamknięta 2026-08-01
+## Aktualizacja 2026-08-19 — Figure 1 wygenerowana (`make_figure1.py`)
+
+Napisano `make_figure1.py` (czyste numpy + matplotlib, bez torcha —
+odpalane lokalnie, nie na Kaggle) i wygenerowano `figure1.pdf`/`figure1.png`
+do preprintu. Panel (a): krzywe przeżycia Kaplana-Meiera τ_border, 3
+topologie × 2 siatki (192³/288³), próg detekcji 10% (ten sam co werdykt
+`scope_analyze.py`). Panel (b): mediana τ_border w funkcji progu detekcji
+(1–50%), sprawdza stabilność wyboru progu. Definicja τ_border identyczna
+jak w `scope_analyze.py` (pierwsze przejście `diss_border` przez `frac`
+własnej wartości końcowej; nieosiągnięte = cenzurowane na horyzoncie).
+
+Wejście: `conf_A_192/runs.json`, `conf_C_288/runs.json` (pełne n=12 po
+scaleniu C1+C2, patrz aktualizacja 2026-08-18 niżej). Mediany @ 10%
+wypisane przez skrypt jako sanity check zgodne z wcześniej raportowanym
+`scope_analyze.py`:
+
+```
+192³: distributed=360  shell=1350  central=3330
+288³: distributed=855  shell=1890  central=4770
+```
+
+Porządek `distributed < shell < central` widoczny na obu panelach, bez
+przecięć krzywych/serii między siatkami — wizualne potwierdzenie tego, co
+już stwierdzał werdykt automatyczny. `make_figure1.py`, `figure1.pdf`,
+`figure1.png` zacommitowane do repo (commity `97192a5`, `ca7c475`).
+
+## Aktualizacja 2026-08-18 — ramię C domknięte w pełni, n=12, `conf_C_288`
+
+Ramię C zostało pre-registered jako n=12 (ziarna 2000–2011), ale z powodu
+limitu sesji Kaggle 9h wykonane technicznie w dwóch połowach: C1 (ziarna
+2000–2005, zamknięte 2026-08-01, opisane niżej jako "połowa zestawu") i C2
+(ziarna 2006–2011, dograne 2026-08-18). Oba przebiegi identyczne parametry
+(288³, F=0.042, k=0.062, grubość powłoki 3.0, wszystkie 3 topologie).
+Scalone w `conf_C_288/` (`runs.json` — 36 przebiegów, `summary.json` —
+reagregacja; `conf_C1_288/` i `conf_C2_288/` pozostają nietknięte jako
+źródła audytowe). Sanity check reagregacji: `n_alive=12/12` na każdą
+topologię, `seeded_fraction` shell ≈3.81% (zgodne z obiema połowami),
+`tau_diss_mean` shell ≈2760 (zgodne z ~2745 widzianym w C1 i C2 osobno).
+
+Werdykt automatyczny przeliczony na pełnym zestawie
+(`scope_analyze.py --primary conf_A_192 --control conf_C_288
+--yardstick sens_192_shell_narrow/sensitivity.json`): **POTWIERDZONE
+(warunkowo — decyzja o interpretacji miarki wrażliwości nadal pozostawiona
+autorowi)**, ten sam werdykt jakościowy co przy n=6, ale teraz na pełnym
+pre-registered n. Sekcja "Ramię C" niżej zaktualizowana na dane n=12;
+sekcje odwołujące się do C1 (n=6) jako "połowy zestawu" zachowane w
+historii jako opis stanu z 2026-08-01, ale **`conf_C_288` jest teraz
+zestawem kontrolnym używanym w werdykcie**, nie `conf_C1_288`.
+
+## Konfirmacja zamknięta 2026-08-01 (patrz aktualizacja 2026-08-18 wyżej)
 
 Zestaw A + B′ + C1 + sonda parametryczna ±0.5% domknięty. Werdykt
 automatyczny (`scope_analyze.py --primary conf_A_192 --control conf_C1_288
@@ -8,6 +57,8 @@ automatyczny (`scope_analyze.py --primary conf_A_192 --control conf_C1_288
 (warunkowo — decyzja o interpretacji miarki wrażliwości pozostawiona
 autorowi)**. Pełne wyjście skryptu i surowe dane w `conf_A_192/`,
 `conf_B_288/`, `conf_C1_288/`, `sens_192_shell/`, `sens_192_shell_narrow/`.
+C1 miało wtedy n=6 (połowa zaplanowanego n=12) — patrz aktualizacja
+2026-08-18 wyżej dla domkniętego zestawu `conf_C_288` (n=12).
 
 ### Ramię A — podstawowe (`conf_A_192/`)
 
@@ -39,33 +90,44 @@ reakcji-dyfuzji do granicy rośnie z rozmiarem domeny przy ~stałej
 prędkości frontu). NIE w paśmie homogenizacji (≤1.15). Czysty efekt n przy
 stałej frakcji zasiewu przeżywa więc test skalowania.
 
-### Ramię C1 — kontrolne, połowa zestawu (`conf_C1_288/`)
+### Ramię C — kontrolne, pełny zestaw n=12 (`conf_C_288/`, scalone C1+C2)
 
-288³, wszystkie 3 topologie, grubość 3.0, **n=6** (ziarna 2000–2005 —
-połowa zaplanowanych n=12 dla ramienia C, druga połowa nieodpalona; commit
-"half C"). 18/18 żyje, wszystkie bramki WAŻNE. Frakcja zasiewu ~3.82% —
-**zmniejszona względem A** (5.72%): świadomie zaakceptowana konfundacja
-frakcji ze skalą, tak jak opisano przy ratyfikacji wariantu B′ wyżej w tym
-pliku (grubość ∝ n nie daje samopodobieństwa fizycznego, patrz też
-FINDINGS.md). τ_border mediany:
+288³, wszystkie 3 topologie, grubość 3.0, **n=12** (ziarna 2000–2011 —
+pełny pre-registered zestaw ramienia C, wykonany w dwóch sesjach Kaggle ze
+względu na limit 9h: C1 ziarna 2000–2005 [2026-08-01], C2 ziarna
+2006–2011 [2026-08-18], scalone w `conf_C_288/` [2026-08-18] — patrz
+aktualizacja na górze pliku). 36/36 żyje, wszystkie bramki WAŻNE. Frakcja
+zasiewu ~3.81–3.83% — **zmniejszona względem A** (5.72%): świadomie
+zaakceptowana konfundacja frakcji ze skalą, tak jak opisano przy
+ratyfikacji wariantu B′ wyżej w tym pliku (grubość ∝ n nie daje
+samopodobieństwa fizycznego, patrz też FINDINGS.md). τ_border mediany
+(przeliczone na pełnym n=12, `scope_analyze.py`):
 
 ```
-distributed 810  <  shell 1890  <  central 4770
+distributed 855  <  shell 1890  <  central 4770
 ```
 
-**Ten sam porządek co A.** Log-rank, p_Holm ≈ 1.19e-03 dla wszystkich
+**Ten sam porządek co A.** Log-rank, p_Holm ≈ 1.291e-06 dla wszystkich
 trzech par kontrolnych (korekta Holma współdzielona z A, 6 porównań
-łącznie). Porządek `distributed < shell < central` zachowany na obu
-skalach (192³ i 288³).
+łącznie) — o rząd wielkości mocniejsze niż przy n=6 (p_Holm ≈1.19e-03),
+zgodnie z oczekiwaniem przy podwojeniu n. Porządek
+`distributed < shell < central` zachowany na obu skalach (192³ i 288³) i
+stabilny względem progu (1%–50% wartości końcowej, patrz wyjście
+`scope_analyze.py`).
 
-Ilorazy τ(C1)/τ(A) (informacyjnie, poza formalną definicją testu
+Ilorazy τ(C)/τ(A) (informacyjnie, poza formalną definicją testu
 skalowania B′→A, która dotyczy wyłącznie `shell` przy stałej frakcji):
 
-| topologia | τ(C1) | τ(A) | iloraz | w widełkach transportu [1.25,1.75]? |
+| topologia | τ(C, n=12) | τ(A) | iloraz | w widełkach transportu [1.25,1.75]? |
 |---|---|---|---|---|
 | shell | 1890 | 1350 | **1.40** | tak |
 | central | 4770 | 3330 | **1.43** | tak |
-| distributed | 810 | 360 | **2.25** | nie — spójne z konfundacją frakcji (3.82% vs 5.72%), nie z efektem skali samym w sobie |
+| distributed | 855 | 360 | **2.38** | nie — spójne z konfundacją frakcji (3.82% vs 5.72%), nie z efektem skali samym w sobie |
+
+(Przy n=6, czyli tylko C1, iloraz `distributed` wychodził 2.25 —
+przesunięcie do 2.38 przy pełnym n=12 to szum próbki na tym ramieniu, nie
+zmiana wniosku: nadal poza widełkami transportu, nadal czytane jako
+konfundacja frakcji.)
 
 ### Sonda parametryczna ±0.5% — miarka wrażliwości (`sens_192_shell_narrow/`)
 
@@ -109,23 +171,27 @@ Solidny wynik częściowy. Hipoteza transportu topologicznego potwierdzona
 ilościowo dla porównań central vs {shell, distributed} — marginesy 3.14×
 i 4.71× powyżej rozrzutu parametrycznego, log-rank miażdżąco istotny dla
 wszystkich par na obu skalach z korekcją Holma (p_Holm ≈1.5–1.9e-07 na A,
-≈1.19e-03 na C1), porządek replikuje się 192³→288³, test skalowania B′
-(iloraz 1.40) i ilorazy C1/A dla shell i central (1.40, 1.43) trafiają w
-przedział pre-registered "transport frontowy". Dla porównania shell vs
-distributed margines wynosi 1.57× — na granicy akceptowalności
+≈1.29e-06 na C przy pełnym n=12), porządek replikuje się 192³→288³, test
+skalowania B′ (iloraz 1.40) i ilorazy C/A dla shell i central (1.40, 1.43)
+trafiają w przedział pre-registered "transport frontowy". Dla porównania
+shell vs distributed margines wynosi 1.57× — na granicy akceptowalności
 metodologicznej, wyraźnie bliżej rozrzutu parametrycznego niż pozostałe
 dwie pary, więc to porównanie jest tym, które najłatwiej byłoby podważyć
-dodatkowym ziarnem albo węższą sondą. Iloraz τ(C1)/τ(A) dla `distributed`
-(2.25) leży poza widełkami transportu — spójne z tym, że C1 zmienia
-frakcję zasiewu wobec A (3.82% vs 5.72%), nie tylko n, więc to porównanie
-nie jest czystym testem skalowania i nie powinno być czytane jako taki.
+dodatkowym ziarnem albo węższą sondą. Iloraz τ(C)/τ(A) dla `distributed`
+(2.38 na pełnym n=12, było 2.25 na n=6) leży poza widełkami transportu —
+spójne z tym, że C zmienia frakcję zasiewu wobec A (3.82% vs 5.72%), nie
+tylko n, więc to porównanie nie jest czystym testem skalowania i nie
+powinno być czytane jako taki.
 
 Wynik nie jest triumfem — jest rzemieślniczo domkniętą pracą do publikacji
-z uczciwie opisanymi granicami interpretacji. Zastrzeżenia do
-"warunkowo" w werdykcie: C1 ma n=6 zamiast zaplanowanych 12 (druga połowa
-ramienia C nieodpalona, C2 pozostaje jako opcjonalny robustness check), a
-miarka wrażliwości pochodzi z jednej topologii (`shell`) i jednego
-rozmiaru siatki (192³), nie z zestawu niezależnego od ramion ocenianych.
+z uczciwie opisanymi granicami interpretacji. Zastrzeżenie o n=6 na
+ramieniu C (druga połowa nieodpalona) jest **rozwiązane od 2026-08-18** —
+`conf_C_288` ma teraz pełne pre-registered n=12 (C1+C2 scalone,
+reprodukowalność między sesjami Kaggle potwierdzona: dwie niezależne
+połowy dały ten sam porządek i zgodne mediany). Pozostałe zastrzeżenie do
+"warunkowo" w werdykcie: miarka wrażliwości pochodzi z jednej topologii
+(`shell`) i jednego rozmiaru siatki (192³), nie z zestawu niezależnego od
+ramion ocenianych.
 
 ---
 
@@ -274,6 +340,14 @@ Podział zestawu A/B′/C na sesje wg budżetu — **czeka na sondy timingowe
 (2×T4 vs P100), które ŁC przyniesie po zielonym teście i pushu.** Nie
 zakładać podziału z góry.
 
+**Stan faktyczny (uzupełnione retrospektywnie):** komórka E dla C
+faktycznie nie zmieściła się w jednej sesji 9h nawet po poprawce conv3d,
+więc odpalona jako dwie komórki z `--n-runs 6` każda: `--seed-base 2000
+--outdir conf_C1_288` (2026-08-01) i `--seed-base 2006 --outdir
+conf_C2_288` (2026-08-18), scalone lokalnie w `conf_C_288/` (patrz
+aktualizacja 2026-08-18 na górze pliku). Komórki A i B′ zmieściły się w
+pojedynczych sesjach zgodnie z planem powyżej.
+
 ---
 
 ## Historia — stan na 2026-07-23, przerwane na stop instancji vast.ai
@@ -331,30 +405,32 @@ Uporządkowanie stabilne dla progów 1%–50% wartości końcowej.
 
 ## Do zrobienia po powrocie, w kolejności
 
+Ta lista jest historyczna (stan sprzed uruchomienia jakichkolwiek
+przebiegów konfirmacyjnych); pozycje 1–4 zostały od tego czasu wykonane,
+w praktyce innymi konkretnymi komendami/plikami niż tu naszkicowano
+(patrz aktualizacje na górze pliku dla faktycznego przebiegu). Zachowana
+jako zapis, nie jako aktualny plan.
+
 1. ~~Ratyfikować B′~~ — **zrobione 2026-07-24**, patrz aktualizacja na
    górze pliku.
-2. **Miarka wrażliwości** — przerwana w połowie, `sens_192/` jest pusty.
-   Powtórzyć w całości:
-   ```
-   python3 scope_sensitivity.py --grid 192 --steps 45000 --record-every 500 \
-     --F 0.042 --k 0.062 --pct 2.0 --shell-thickness 3.0 \
-     --topology central --seed 1000 --outdir sens_192
-   ```
-   Szacunek ~12 min pochodzi z 4× RTX 4090 — na Kaggle (2× T4) przeszacować
-   dopiero po sondach timingowych (patrz aktualizacja na górze pliku).
-3. **Zestaw konfirmacyjny**, ziarna 2000+ (rozłączne z pilotem 1000+) —
-   dokładne komendy (jako komórki Kaggle) i tabela różnic A/B′/C: patrz
-   sekcja **„Aktualizacja 2026-07-24"** na górze tego pliku. Budżet czasowy
-   ~6 h zakładał 4× RTX 4090 i jest nieaktualny dla 2× T4 — nie
-   ekstrapolować bez zmierzonego speedupu (komórka B tamtej sekcji).
-4. **Werdykt**:
+2. ~~**Miarka wrażliwości**~~ — **zrobione**: sonda ±0.5%
+   (`sens_192_shell_narrow/`) jest tą użytą w werdykcie; sonda ±2%
+   (`sens_192_shell/`) zachowana jako referencja negatywna. Patrz sekcje
+   „Sonda parametryczna" wyżej.
+3. ~~**Zestaw konfirmacyjny**, ziarna 2000+~~ — **zrobione**: A
+   (`conf_A_192/`, n=16), B′ (`conf_B_288/`, n=12), C (`conf_C_288/`,
+   n=12, scalone z C1+C2 2026-08-18 — patrz aktualizacja na górze pliku).
+4. ~~**Werdykt**~~ — **zrobione i przeliczone na pełnym C (n=12)**:
    ```
    python3 scope_analyze.py --primary conf_A_192 --control conf_C_288 \
-     --yardstick sens_192/sensitivity.json
+     --yardstick sens_192_shell_narrow/sensitivity.json
    ```
-5. **Wykładnik skalowania τ z n** (warunek rewizji kroków z §7) — policzyć
-   z pary A→B′ przez `scope_horizon.tau_scaling_exponent`. Jeśli > 1,
-   kroki ∝ n są nieważne i trzeba je podnieść.
+   → POTWIERDZONE (warunkowo), patrz aktualizacja 2026-08-18 na górze
+   pliku dla pełnego wyjścia.
+5. **Wykładnik skalowania τ z n** (warunek rewizji kroków z §7) — **nadal
+   otwarte**. Policzyć z pary A→B′ przez
+   `scope_horizon.tau_scaling_exponent`. Jeśli > 1, kroki ∝ n są nieważne
+   i trzeba je podnieść.
 
 ## Odtworzenie środowiska po restarcie instancji
 
