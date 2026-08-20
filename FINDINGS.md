@@ -307,3 +307,71 @@ Ramię A (192³, n=16, τ_border, próg 10% wartości końcowej): distributed
 par; stabilne dla progów 1–50%; wszystkie 48 przebiegów alive,
 seeded_fraction ~5.72%; werdykt NIEROZSTRZYGNIETE zgodnie z CRITERIA_v2,
 oczekuje testu skalowania w B′.
+
+## Dekompozycja τ_border: aktywacja vs transport (2026-08-20)
+
+Recenzja: τ_border może być zdominowane odległością radialną, nie
+topologią. `front_from_fill.py` rozkłada τ_border na proxy aktywacji
+(czas do 10% znormalizowanego fill φ_norm) i proxy transportu
+(τ_border − t_act), korzystając z fill(t) już zapisanego w runs.json.
+
+Kluczowy wynik: `fill(t=0) ≈ 0.057` dla wszystkich trzech topologii (sam
+zasiew), więc surowy próg 5% jest zdegenerowany — stąd normalizacja
+φ_norm(t) = [φ(t) − φ(0)] / [1 − φ(0)].
+
+Wynik dekompozycji na `conf_A_192` (192³): aktywacja porządkuje
+topologie inaczej niż transport. `t_act` szybkie dla shell/distributed
+(90/180), rząd wielkości wolniejsze dla central (2250) — spójne z
+surface-to-volume pojedynczego zwartego zasiewu. `t_tr` (transport)
+krótkie dla distributed (180), ale porównywalne dla shell i central
+(1260 vs 1080) mimo maksymalnie różnych promieni środka masy zasiewu
+(0.75R vs 0) — model stałej prędkości frontu (odległość/prędkość) tego
+nie przewiduje. Tempo ekspansji dφ_norm/dt w oknie 10%→40% różni się
+~4× między topologiami (distributed 5.1e-4, central 2.2e-4, shell
+1.3e-4), więc pojedyncza prędkość frontu nie zamyka się na danych.
+
+Wniosek wprowadzony do DRAFT.md jako nowa III.E + Tabela IV (Revision
+B): roszczenie zawężone z "topology" na "seed geometry"; tytuł i
+abstrakt zmienione; IV.A/B/C/D zrewidowane pod kątem uczciwej atrybucji
+mechanistycznej. Statystyka i Tabele I–III bez zmian.
+
+Pełny output `front_from_fill.py --runs conf_A_192/runs.json`:
+
+```
+=== time to reach RAW fill milestones (median over runs) ===
+ level | distributed |       shell |     central
+    5% |           0 |           0 |           0
+   10% |          90 |          90 |        1980
+   20% |         270 |        1620 |        2520
+   30% |         360 |        2070 |        3060
+   40% |         630 |        2250 |        3420
+   50% |         990 |        2610 |        3780
+
+=== time to reach NORMALIZED f_norm milestones (f_norm = (fill-fill0)/(1-fill0)) (median over runs) ===
+ level | distributed |       shell |     central
+    5% |          90 |          90 |        2070
+   10% |         180 |          90 |        2250
+   20% |         270 |        1890 |        2700
+   30% |         450 |        2160 |        3240
+   40% |         765 |        2340 |        3600
+   50% |        1080 |        2790 |        3870
+
+=== mean expansion rate d(f_norm)/dt in the 10%->40% window ===
+(if topologies share a rate, tau ordering is geometry/distance;
+ if rates differ, there is a shape/topology component)
+  distributed: 5.128e-04 /unit   (t10=180, t40=765)
+        shell: 1.333e-04 /unit   (t10=90, t40=2340)
+      central: 2.222e-04 /unit   (t10=2250, t40=3600)
+
+=== transport time: tau_border - t_act (f_norm=10% activation proxy) ===
+   topology |      t_act | tau_border |  transport
+distributed |        180 |        360 |        180
+      shell |         90 |       1350 |       1260
+    central |       2250 |       3330 |       1080
+
+=== referee's model on f_norm-onset: activation + distance/speed ===
+seed mass-center radii (voxels, 192^3, R=96): distributed~0, shell~72, central~0
+NOTE: distributed and central both have small mass-center radius;
+      the discriminating pair is shell (r=72) vs central (r=0).
+activation proxy (distributed time to 10% f_norm): 180
+```
