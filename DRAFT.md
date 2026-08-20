@@ -184,3 +184,5 @@ Decomposition of the onset time at 192³. Activation proxy t_act is the median t
 ## Status
 
 Revision B (2026-08-19): title narrowed, III.E onset decomposition added, Table IV added, IV.A/B/C/D revised for honest mechanistic attribution. Statistics and Tables I-III unchanged. Pending: recompile, final [verify] refs, repo public.
+
+Revision C complete 2026-08-20. All two-review Group-B objections addressed textually; Group C (self-similar arm, front-tracking, geometric controls) deferred to companion paper. 21 refs Firecrawl-verified. Pending: Overleaf recompile of Rev C, repo public, arXiv upload.
